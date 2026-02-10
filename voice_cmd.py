@@ -172,4 +172,4 @@ with sd.InputStream(
         else:
             partial = json.loads(recognizer.PartialResult())
             if partial.get("partial"):
-                print("...", partial["partial"])
+                print("...", partial["partil"])

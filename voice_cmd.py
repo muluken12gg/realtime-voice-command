@@ -9,6 +9,7 @@ from pycaw.pycaw import AudioUtilities
 import re
 import time
 from urllib.parse import quote_plus
+from datetime import datetime
 
 speaking = False
 ignored_phrases = {
@@ -61,6 +62,13 @@ def search_google(text):
         return True
 
     return False
+
+def report_time():
+    now = datetime.now()
+    spoken = now.strftime("The time is %I:%M %p")
+    speak(spoken)
+    print(f"🕒{spoken}")
+    return True
 
 def open_website(text):
     match = re.search(r"open (?:website|site|page) (.+)", text)
@@ -155,6 +163,9 @@ def handle_command(text):
         speak("opening browser")
         print("🌐Opening browser")
 
+    elif "what time" in text or "current time" in text or "tell me the time" in text:
+        report_time()
+
     elif ("open" in text) and ("youtube" in text or "you too" in text):
         webbrowser.open("https://youtube.com")
         speak("opening youtube")
@@ -213,7 +224,7 @@ with sd.InputStream(
             if text in ignored_phrases:
                 continue
 
-            if wake_word in text and not awake:
+            if (wake_word in text or "im peter" in text) and not awake:
                 awake = True
                 speak("Yes?")
                 recognizer.Reset()

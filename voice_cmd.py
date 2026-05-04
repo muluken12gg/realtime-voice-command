@@ -62,6 +62,24 @@ def search_google(text):
 
     return False
 
+def open_website(text):
+    match = re.search(r"open (?:website|site|page) (.+)", text)
+    if not match:
+        return False
+
+    site = match.group(1).strip()
+    site = site.replace(" dot ", ".").replace(" ", "")
+    if not site:
+        return False
+
+    if not site.startswith("http://") and not site.startswith("https://"):
+        site = f"https://{site}"
+
+    webbrowser.open(site)
+    speak(f"opening {site}")
+    print(f"🌐Opening website: {site}")
+    return True
+
 def set_volume(change):
     volume = AudioUtilities.GetSpeakers().EndpointVolume
 
@@ -125,6 +143,9 @@ def handle_command(text):
 
     elif "open book" in text:
         subprocess.Popen([r"C:\Users\HP\AppData\Local\SumatraPDF\SumatraPDF.exe"])
+
+    elif open_website(text):
+        pass
 
     elif search_google(text):
         pass

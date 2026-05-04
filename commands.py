@@ -1,11 +1,36 @@
+import json
 import webbrowser
 import os
 import subprocess
+from pathlib import Path
 from pycaw.pycaw import AudioUtilities
 import re
 import time
 from urllib.parse import quote_plus
 from datetime import datetime
+
+CONFIG_PATH = Path(__file__).with_name("commands.json")
+
+def load_config():
+    if not CONFIG_PATH.exists():
+        return {}
+
+    try:
+        return json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+_config = load_config()
+app_aliases = _config.get("app_aliases", {
+    "vscode": "code",
+    "word": "winword",
+    "excel": "excel",
+})
+folder_aliases = _config.get("folder_aliases", {
+    "home": "~",
+    "documents": "~/Documents",
+    "downloads": "~/Downloads",
+})
 
 speaking = False
 ignored_phrases = {
@@ -87,6 +112,43 @@ def report_time():
     spoken = now.strftime("The time is %I:%M %p")
     speak(spoken)
     print(f"🕒{spoken}")
+    return True
+
+
+def open_alias_app(text):
+    if not text.startswith("open "):
+        return False
+
+    target = text[len("open "):].strip()
+    command = app_aliases.get(target)
+    if not command:
+        return False
+
+    if command.startswith("http://") or command.startswith("https://"):
+        webbrowser.open(command)
+    elif os.path.isfile(os.path.expanduser(command)):
+        subprocess.Popen(os.path.expanduser(command))
+    else:
+        subprocess.Popen(["cmd", "/c", "start", command])
+
+    speak(f"opening {target}")
+    print(f"📎Opening app alias: {target} -> {command}")
+    return True
+
+
+def open_alias_folder(text):
+    if not text.startswith("open "):
+        return False
+
+    target = text[len("open "):].strip()
+    path = folder_aliases.get(target)
+    if not path:
+        return False
+
+    folder = os.path.expanduser(path)
+    os.startfile(folder)
+    speak(f"opening {target} folder")
+    print(f"📁Opening folder: {target} -> {folder}")
     return True
 
 
@@ -196,6 +258,10 @@ def handle_command(text):
         ])
     elif "open book" in text:
         subprocess.Popen([r"C:\Users\HP\AppData\Local\SumatraPDF\SumatraPDF.exe"])
+    elif open_alias_folder(text):
+        pass
+    elif open_alias_app(text):
+        pass
     elif open_website(text):
         pass
     elif calculate_expression(text):

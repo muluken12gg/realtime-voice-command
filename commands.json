@@ -1,0 +1,12 @@
+{
+  "app_aliases": {
+    "vscode": "code",
+    "word": "winword",
+    "excel": "excel"
+  },
+  "folder_aliases": {
+    "home": "~",
+    "documents": "~/Documents",
+    "downloads": "~/Downloads"
+  }
+}

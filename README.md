@@ -4,6 +4,7 @@ A system to command computer to do tasks with voice
 ## Project structure
 - `voice_cmd.py` — main entrypoint and audio loop
 - `commands.py` — command parsing, actions, and voice responses
+- `commands.json` — customizable app and folder aliases
 
 ## New feature
 - Added voice search support: say `search for ...` or `google ...` and the assistant opens a Google search in your browser.

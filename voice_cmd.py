@@ -8,6 +8,7 @@ import subprocess
 from pycaw.pycaw import AudioUtilities
 import re
 import time
+from urllib.parse import quote_plus
 
 speaking = False
 ignored_phrases = {
@@ -39,6 +40,27 @@ def normalize(text):
     text = re.sub(r"[^a-z0-9\s]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text
+
+def search_google(text):
+    query = None
+
+    if text.startswith("search for "):
+        query = text[len("search for "):].strip()
+    elif text.startswith("google "):
+        query = text[len("google "):].strip()
+    else:
+        match = re.search(r"(?:search|google) (?:for )?(.*)", text)
+        if match:
+            query = match.group(1).strip()
+
+    if query:
+        url = f"https://www.google.com/search?q={quote_plus(query)}"
+        webbrowser.open(url)
+        speak(f"searching google for {query}")
+        print(f"🌐Searching Google for: {query}")
+        return True
+
+    return False
 
 def set_volume(change):
     volume = AudioUtilities.GetSpeakers().EndpointVolume
@@ -77,6 +99,12 @@ def handle_command(text):
         os.startfile(os.path.expanduser("~"))
         speak("opening folder")
         print("📂Folder opened")
+    
+    elif "thank you" in text:
+        speak("")
+
+    elif "fuck you" in text or "fuck him" in text:
+        speak("fuck you too piece of shit!")
 
     elif ("open" in text) and ("code" in text or "call" in text or "Called" in text):
         subprocess.Popen(["cmd", "/c", "start", "code"])
@@ -89,11 +117,17 @@ def handle_command(text):
     elif "open tracker" in text:
         subprocess.Popen(["cmd", "/c", "start", "excel"])
 
-    elif "okay" in text:
+    elif "open library" in text:
         subprocess.Popen([
             "explorer.exe",
             "shell:AppsFolder\\61284Wimberry.FlashQuiz_ycy428092yk7c!App"
         ])
+
+    elif "open book" in text:
+        subprocess.Popen([r"C:\Users\HP\AppData\Local\SumatraPDF\SumatraPDF.exe"])
+
+    elif search_google(text):
+        pass
 
     elif "open browser" in text:
         webbrowser.open("https://google.com")
@@ -105,6 +139,7 @@ def handle_command(text):
         speak("opening youtube")
         print("⏯️Opening YouTube")
     elif "shut down" in text:
+        speak("hey, are you crazy? idiot, stupid number one.")
         print("⚠️Shutdown command blocked(safety)")
     else:
         speak("command not recognized")
@@ -169,7 +204,18 @@ with sd.InputStream(
                 handle_command(text)
                 awake = False
 
+            if "hello" in text:
+                speak("What's up Muluken?")
+
+            
+            if "yeah no" in text:
+                speak("Yerosat isa doormii keetii sanamoo")
+            
+            if "thank you" in text:
+                speak("you're welcome")
+                print("you're welcome")
+
         else:
             partial = json.loads(recognizer.PartialResult())
             if partial.get("partial"):
-                print("...", partial["partil"])
+                print("...", partial["partial"])

@@ -63,6 +63,25 @@ def search_google(text):
 
     return False
 
+def search_youtube(text):
+    query = None
+
+    if text.startswith("search youtube for "):
+        query = text[len("search youtube for "):].strip()
+    elif text.startswith("youtube search for "):
+        query = text[len("youtube search for "):].strip()
+    elif text.startswith("youtube "):
+        query = text[len("youtube "):].strip()
+
+    if query:
+        url = f"https://www.youtube.com/results?search_query={quote_plus(query)}"
+        webbrowser.open(url)
+        speak(f"searching YouTube for {query}")
+        print(f"▶️Searching YouTube for: {query}")
+        return True
+
+    return False
+
 def report_time():
     now = datetime.now()
     spoken = now.strftime("The time is %I:%M %p")
@@ -153,6 +172,9 @@ def handle_command(text):
         subprocess.Popen([r"C:\Users\HP\AppData\Local\SumatraPDF\SumatraPDF.exe"])
 
     elif open_website(text):
+        pass
+
+    elif search_youtube(text):
         pass
 
     elif search_google(text):

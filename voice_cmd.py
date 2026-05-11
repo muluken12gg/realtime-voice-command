@@ -1,80 +1,49 @@
-import queue
-from vosk import Model, KaldiRecognizer
-import sounddevice as sd
-import json
+import subprocess
 import commands
 
-MODEL_PATH = "vosk-model-small-en-us-0.15"
+MODEL_PATH = "Release/models/ggml-medium.bin"
 DEVICE_INDEX = 5
 
-device_info = sd.query_devices(DEVICE_INDEX, 'input')
-SAMPLE_RATE = int(device_info['default_samplerate'])
+command = ["Release/whisper-stream.exe", "--model", MODEL_PATH, "--capture", str(DEVICE_INDEX), "--language", "en", "--step", "2000", "--length", "5000"]
 
-q = queue.Queue()
-
-def callback(indata, frames, time, status):
-    if status:
-        print(status)
-
-    pcm16 = (indata * 32767).astype('int16')
-    q.put(pcm16.tobytes())
-
-model = Model(MODEL_PATH)
-recognizer = KaldiRecognizer(model, SAMPLE_RATE)
+proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 wake_word = "computer"
 awake = False
 
-with sd.InputStream(
-    samplerate = SAMPLE_RATE,
-    blocksize = 4000,
-    dtype = "float32",
-    channels = 1,
-    callback = callback
-):
-    print(f"🎤Listening in device [DEVICE_INDEX] at [SAMPLE_RATE] hz ... Speak now(Ctrl + C to stop)")
-    while True:
-        data = q.get()
+print("🎤Listening... Speak now (Ctrl + C to stop)")
 
-        if commands.speaking:
+while True:
+    line = proc.stdout.readline()
+    if line == '' and proc.poll() is not None:
+        break
+    text = line.strip()
+    if text:
+        print("🗣️", text)
+        normalized = commands.normalize(text)
+
+        if not normalized:
             continue
 
-        if recognizer.AcceptWaveform(data):
-            result = json.loads(recognizer.Result())
-            text = commands.normalize(result.get("text", ""))
+        if normalized in commands.ignored_phrases:
+            continue
 
-            if not text:
-                continue
+        if (wake_word in normalized or "im peter" in normalized) and not awake:
+            awake = True
+            commands.speak("Yes?")
+            print("✅Wake word detected")
+            continue
 
-            print("🗣️", text)
+        if awake:
+            commands.handle_command(normalized)
+            awake = False
 
-            if text in commands.ignored_phrases:
-                continue
-
-            if (wake_word in text or "im peter" in text) and not awake:
-                awake = True
-                commands.speak("Yes?")
-                recognizer.Reset()
-                print("✅Wake word detected")
-                continue
-
-            if awake:
-                recognizer.Reset()
-                commands.handle_command(text)
-                awake = False
-
-            if "hello" in text:
-                commands.speak("What's up Muluken?")
-
-            
-            if "yeah no" in text:
-                commands.speak("Yerosat isa doormii keetii sanamoo")
-            
-            if "thank you" in text:
-                commands.speak("you're welcome")
-                print("you're welcome")
-
-        else:
-            partial = json.loads(recognizer.PartialResult())
-            if partial.get("partial"):
-                print("...", partial["partial"])
+        if "hello" in normalized:
+            commands.speak("What's up Muluken?")
+        
+        if "yeah no" in normalized:
+            commands.speak("Yerosat isa doormii keetii sanamoo")
+        
+        if "thank you" in normalized:
+            commands.speak("you're welcome")
+            print("you're welcome")

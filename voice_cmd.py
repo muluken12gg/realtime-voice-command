@@ -1,7 +1,7 @@
 import subprocess
 import commands
 
-MODEL_PATH = "Release/models/ggml-medium.bin"
+MODEL_PATH = "Release/models/ggml-medium.en.bin"
 DEVICE_INDEX = 5
 
 command = ["Release/whisper-stream.exe", "--model", MODEL_PATH, "--capture", str(DEVICE_INDEX), "--language", "en", "--step", "2000", "--length", "5000"]

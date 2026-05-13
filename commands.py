@@ -36,6 +36,9 @@ speaking = False
 ignored_phrases = {
     "yes",
     "yeah",
+    # Whisper placeholder when a chunk has no usable speech (silence / dropped audio).
+    "blank audio",
+    "blankaudio",
 }
 
 def speak(text):
@@ -185,11 +188,14 @@ def set_volume(change):
 
 def calculate_expression(text):
     expression = text
-
+    matched = False
     for prefix in ("what is ", "calculate ", "compute "):
         if expression.startswith(prefix):
             expression = expression[len(prefix):]
+            matched = True
             break
+    if not matched:
+        return False
 
     expression = expression.replace("plus", "+")
     expression = expression.replace("minus", "-")
@@ -202,6 +208,11 @@ def calculate_expression(text):
     expression = re.sub(r"\s+", " ", expression).strip()
 
     if not expression:
+        return False
+    # Block "what is 2" / TTS junk; require an actual operation.
+    if re.fullmatch(r"-?\d+(?:\.\d+)?", expression):
+        return False
+    if not re.search(r"[\+\-\*\/]", expression):
         return False
 
     try:

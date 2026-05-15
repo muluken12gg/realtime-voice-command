@@ -1,5 +1,3 @@
 numpy>=1.24
 sounddevice>=0.4.6
-torch>=2.0
-# torch.hub Silero VAD imports this in utils_vad.py
-packaging>=23.0
+vosk>=0.3.45

@@ -8,9 +8,9 @@ from vosk_loop import iter_vosk_transcripts, resolve_vosk_model
 
 ROOT = Path(__file__).resolve().parent
 
-DEVICE_INDEX = int(os.environ.get("VOSK_DEVICE", os.environ.get("WHISPER_DEVICE", "-1")))
+DEVICE_INDEX = int(os.environ.get("VOSK_DEVICE", "1"))
 POST_WAKE_CMD_SEC = float(
-    os.environ.get("VOSK_POST_WAKE_SEC", os.environ.get("WHISPER_POST_WAKE_SEC", "1.25"))
+    os.environ.get("VOSK_POST_WAKE_SEC", "1.25")
 )
 
 

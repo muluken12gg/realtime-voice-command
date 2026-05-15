@@ -5,6 +5,14 @@ A system to command computer to do tasks with voice
 - `voice_cmd.py` — main entrypoint and audio loop
 - `commands.py` — command parsing, actions, and voice responses
 - `commands.json` — customizable app and folder aliases
+- `Release/` — Whisper.cpp binaries
+- `Release/models/` — Whisper models
+
+## Transcription
+Uses Whisper.cpp for speech-to-text transcription.
+
+## Model
+Place the Whisper medium model as `Release/models/ggml-medium.bin`
 
 ## New feature
 - Added voice search support: say `search for ...` or `google ...` and the assistant opens a Google search in your browser.

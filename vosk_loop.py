@@ -81,6 +81,9 @@ def iter_vosk_transcripts(
     dev = None if device_index is None or device_index < 0 else device_index
     print("🎤Vosk listening (Ctrl+C to stop)…")
 
+    import numpy as np
+    silence_count = 0
+    
     while True:
         block = sd.rec(
             block_samples,
@@ -90,8 +93,29 @@ def iter_vosk_transcripts(
             device=dev,
             blocking=True,
         )
+        
+        # Check audio level
+        audio_data = np.frombuffer(block, dtype=np.int16)
+        max_level = np.max(np.abs(audio_data))
+        
+        if max_level > 100:
+            silence_count = 0
+            if silence_count == 0:
+                print(f"\r🔊 Audio level: {max_level}", end="", flush=True)
+        else:
+            silence_count += 1
+            if silence_count % 10 == 0:
+                print(f"\r🔇 Silent (level: {max_level})", end="", flush=True)
+        
         if recognizer.AcceptWaveform(block.tobytes()):
             result = json.loads(recognizer.Result())
             text = (result.get("text") or "").strip()
             if text:
+                print(f"\r🗣️ {text}", end="", flush=True)
+                print()
                 yield text
+        else:
+            partial = json.loads(recognizer.PartialResult())
+            partial_text = (partial.get("partial") or "").strip()
+            if partial_text:
+                print(f"\r🗣️ {partial_text}...", end="", flush=True)

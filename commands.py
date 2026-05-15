@@ -36,7 +36,7 @@ speaking = False
 ignored_phrases = {
     "yes",
     "yeah",
-    # Whisper placeholder when a chunk has no usable speech (silence / dropped audio).
+    # Placeholder when a chunk has no usable speech (silence / dropped audio).
     "blank audio",
     "blankaudio",
 }

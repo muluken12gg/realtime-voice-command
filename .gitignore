@@ -1,3 +1,4 @@
 __pycache__/
 *.py[cod]
-Release/models/ggml-medium.en.bin
+venv/
+build/

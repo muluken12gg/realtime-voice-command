@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import os
-import tempfile
-import wave
 from pathlib import Path
 from typing import Iterator, Optional
 
@@ -94,27 +92,16 @@ def iter_whisper_transcripts(
                     is_speaking
                     and total_frames >= max_speech_frames
                 ):
-                    audio_data = np.concatenate(speech_buffer)
+                    audio_data = np.concatenate(speech_buffer).astype(np.float32) / 32768.0
 
-                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-                        tmp_path = tmp.name
-                        with wave.open(tmp_path, "wb") as wf:
-                            wf.setnchannels(1)
-                            wf.setsampwidth(2)
-                            wf.setframerate(sample_rate)
-                            wf.writeframes(audio_data.tobytes())
-
-                    try:
-                        result = model.transcribe(
-                            tmp_path,
-                            language="en",
-                            fp16=False,
-                        )
-                        text = (result.get("text") or "").strip()
-                        if text:
-                            yield {"type": "final", "text": text}
-                    finally:
-                        os.unlink(tmp_path)
+                    result = model.transcribe(
+                        audio_data,
+                        language="en",
+                        fp16=False,
+                    )
+                    text = (result.get("text") or "").strip()
+                    if text:
+                        yield {"type": "final", "text": text}
 
                     speech_buffer.clear()
                     silence_counter = 0

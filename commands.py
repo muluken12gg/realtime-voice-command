@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 from pycaw.pycaw import AudioUtilities
 import re
-import time
 from urllib.parse import quote_plus
 from datetime import datetime
 
@@ -51,15 +50,13 @@ def speak(text):
         $speak = New-Object System.Speech.Synthesis.SpeechSynthesizer
         $speak.Speak("{text}")
     '''
-    subprocess.Popen(
+    subprocess.run(
         ["powershell", "-NoProfile", "-Command", ps],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
-
-    time.sleep(0.4)
+    
     speaking = False
-
 
 def normalize(text):
     text = text.lower()
@@ -251,17 +248,21 @@ def handle_command(text):
         speak("opening folder")
         print("📂Folder opened")
     elif "thank you" in text:
-        speak("")
+        pass
     elif "fuck you" in text or "fuck him" in text:
-        speak("fuck you too piece of shit!")
-    elif ("open" in text) and ("code" in text or "call" in text or "Called" in text):
+        pass
+    elif ("open" in text) and ("code" in text or "call" in text or "called" in text or "court" in text  or "coach" in text):
         subprocess.Popen(["cmd", "/c", "start", "code"])
         speak("opening visual studio code")
         print("🧑‍💻VS code opened")
     elif ("open" in text) and ("word" in text or "world" in text or "war" in text):
         subprocess.Popen(["cmd", "/c", "start", "winword"])
+        speak("opening word")
+        print("📄Word opened")
     elif "open tracker" in text:
         subprocess.Popen(["cmd", "/c", "start", "excel"])
+        speak("opening tracker")
+        print("📊Tracker opened")
     elif "open library" in text:
         subprocess.Popen([
             "explorer.exe",
@@ -269,6 +270,8 @@ def handle_command(text):
         ])
     elif "open book" in text:
         subprocess.Popen([r"C:\Users\HP\AppData\Local\SumatraPDF\SumatraPDF.exe"])
+        speak("opening book")
+        print("📖Book opened")
     elif open_alias_folder(text):
         pass
     elif open_alias_app(text):
@@ -290,7 +293,6 @@ def handle_command(text):
         speak("opening youtube")
         print("⏯️Opening YouTube")
     elif "shut down" in text:
-        speak("hey, are you crazy? idiot, stupid number one.")
         print("⚠️Shutdown command blocked(safety)")
     else:
         speak("command not recognized")

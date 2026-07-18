@@ -97,7 +97,11 @@ def iter_whisper_transcripts(
                     result = model.transcribe(
                         audio_data,
                         language="en",
+                        task="transcribe",
                         fp16=False,
+                        temperature=0,
+                        condition_on_previous_text=False,
+                        no_speech_threshold=0.6,
                     )
                     text = (result.get("text") or "").strip()
                     if text:

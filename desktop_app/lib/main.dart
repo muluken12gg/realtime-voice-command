@@ -70,7 +70,7 @@ class _ControlPanelState extends State<ControlPanel> {
 
         return Scaffold(
           body: SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,22 +87,21 @@ class _ControlPanelState extends State<ControlPanel> {
                     onChanged: _controller.setListening,
                   ),
                   const SizedBox(height: 24),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _SettingsCard(
-                            startWithWindows: settings.startWithWindows,
-                            stayInTray: settings.stayInTray,
-                            onStartWithWindowsChanged:
-                                _controller.setStartWithWindows,
-                            onStayInTrayChanged: _controller.setStayInTray,
-                          ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _SettingsCard(
+                          startWithWindows: settings.startWithWindows,
+                          stayInTray: settings.stayInTray,
+                          onStartWithWindowsChanged:
+                              _controller.setStartWithWindows,
+                          onStayInTrayChanged: _controller.setStayInTray,
                         ),
-                        const SizedBox(width: 24),
-                        const Expanded(child: _CommandsCard()),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 24),
+                      const Expanded(child: _CommandsCard()),
+                    ],
                   ),
                 ],
               ),
@@ -130,9 +129,8 @@ class _ListeningCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 28,
-              backgroundColor: listening
-                  ? scheme.primary
-                  : scheme.surfaceContainerHighest,
+              backgroundColor:
+                  listening ? scheme.primary : scheme.surfaceContainerHighest,
               child: Icon(listening ? Icons.mic : Icons.mic_off),
             ),
             const SizedBox(width: 20),
@@ -246,7 +244,7 @@ class _CommandsCard extends StatelessWidget {
               command: '"What time is it?"',
               action: 'Read the current time',
             ),
-            const Spacer(),
+            const SizedBox(height: 24),
             FilledButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.tune),

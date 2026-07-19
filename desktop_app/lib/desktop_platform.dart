@@ -1,4 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+
+import 'windows_startup.dart';
 
 @immutable
 class DesktopSettings {
@@ -61,4 +65,31 @@ class InMemoryDesktopPlatform implements DesktopPlatform {
   Future<void> setStayInTray(bool enabled) async {
     _settings = _settings.copyWith(stayInTray: enabled);
   }
+}
+
+class WindowsDesktopPlatform implements DesktopPlatform {
+  WindowsDesktopPlatform({WindowsStartup? startup, DesktopPlatform? delegate})
+    : _startup =
+          startup ??
+          WindowsStartup(executablePath: Platform.resolvedExecutable),
+      _delegate = delegate ?? InMemoryDesktopPlatform();
+
+  final WindowsStartup _startup;
+  final DesktopPlatform _delegate;
+
+  @override
+  Future<DesktopSettings> loadSettings() async {
+    final settings = await _delegate.loadSettings();
+    return settings.copyWith(startWithWindows: await _startup.isEnabled());
+  }
+
+  @override
+  Future<void> setListening(bool enabled) => _delegate.setListening(enabled);
+
+  @override
+  Future<void> setStartWithWindows(bool enabled) =>
+      _startup.setEnabled(enabled);
+
+  @override
+  Future<void> setStayInTray(bool enabled) => _delegate.setStayInTray(enabled);
 }

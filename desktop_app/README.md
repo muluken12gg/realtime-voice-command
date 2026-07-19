@@ -5,8 +5,12 @@ voice-command service. It deliberately has no terminal-facing controls.
 
 The first UI slice provides the control-panel layout and intended desktop
 settings. The next implementation slices will supply a Windows implementation
-of the desktop-platform boundary for the Python service, system tray, Windows
-startup registration, and a global shortcut.
+of the desktop-platform boundary for the Python service, system tray, and a
+global shortcut.
+
+The Windows startup setting is implemented using the current user's
+`HKCU\Software\Microsoft\Windows\CurrentVersion\Run` registry key, so it does
+not require administrator access.
 
 ## Running it
 

@@ -8,7 +8,9 @@ void main() {
 }
 
 class VoiceCommandApp extends StatelessWidget {
-  const VoiceCommandApp({super.key});
+  const VoiceCommandApp({super.key, this.platform});
+
+  final DesktopPlatform? platform;
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +24,15 @@ class VoiceCommandApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const ControlPanel(),
+      home: ControlPanel(platform: platform),
     );
   }
 }
 
 class ControlPanel extends StatefulWidget {
-  const ControlPanel({super.key});
+  const ControlPanel({super.key, this.platform});
+
+  final DesktopPlatform? platform;
 
   @override
   State<ControlPanel> createState() => _ControlPanelState();
@@ -40,7 +44,9 @@ class _ControlPanelState extends State<ControlPanel> {
   @override
   void initState() {
     super.initState();
-    _controller = ControlPanelController(InMemoryDesktopPlatform());
+    _controller = ControlPanelController(
+      widget.platform ?? WindowsDesktopPlatform(),
+    );
     _controller.initialize();
   }
 

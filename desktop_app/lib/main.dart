@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'control_panel_controller.dart';
+import 'desktop_platform.dart';
+
 void main() {
   runApp(const VoiceCommandApp());
 }
@@ -32,53 +35,75 @@ class ControlPanel extends StatefulWidget {
 }
 
 class _ControlPanelState extends State<ControlPanel> {
-  bool _listening = false;
-  bool _startWithWindows = true;
-  bool _stayInTray = true;
+  late final ControlPanelController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ControlPanelController(InMemoryDesktopPlatform());
+    _controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Voice Command',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              const Text('Your always-ready desktop voice assistant.'),
-              const SizedBox(height: 32),
-              _ListeningCard(
-                listening: _listening,
-                onChanged: (value) => setState(() => _listening = value),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _SettingsCard(
-                        startWithWindows: _startWithWindows,
-                        stayInTray: _stayInTray,
-                        onStartWithWindowsChanged: (value) =>
-                            setState(() => _startWithWindows = value),
-                        onStayInTrayChanged: (value) =>
-                            setState(() => _stayInTray = value),
-                      ),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final settings = _controller.settings;
+        if (settings == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        return Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Voice Command',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text('Your always-ready desktop voice assistant.'),
+                  const SizedBox(height: 32),
+                  _ListeningCard(
+                    listening: settings.listening,
+                    onChanged: _controller.setListening,
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _SettingsCard(
+                            startWithWindows: settings.startWithWindows,
+                            stayInTray: settings.stayInTray,
+                            onStartWithWindowsChanged:
+                                _controller.setStartWithWindows,
+                            onStayInTrayChanged: _controller.setStayInTray,
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        const Expanded(child: _CommandsCard()),
+                      ],
                     ),
-                    const SizedBox(width: 24),
-                    const Expanded(child: _CommandsCard()),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

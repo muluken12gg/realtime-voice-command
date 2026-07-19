@@ -4,6 +4,7 @@ import 'package:voice_command_desktop/main.dart';
 void main() {
   testWidgets('shows the voice command control panel', (tester) async {
     await tester.pumpWidget(const VoiceCommandApp());
+    await tester.pump();
 
     expect(find.text('Voice Command'), findsOneWidget);
     expect(find.text('Desktop behavior'), findsOneWidget);

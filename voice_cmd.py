@@ -82,15 +82,27 @@ def run_whisper_loop(state: ChatState, wake_word: str, model_name: str) -> None:
         process_transcript_line(text, state, wake_word)
 
 
+def choose_mode() -> str:
+    while True:
+        choice = input("Choose mode (voice/chat): ").strip().lower()
+        if choice in ("voice", "chat"):
+            return choice
+        print("Please enter 'voice' or 'chat'.")
+
+
 def main() -> None:
+    mode = choose_mode()
     model_name = resolve_whisper_model(ROOT)
     state = ChatState()
     wake_word = "nero"
 
-    try:
-        run_whisper_loop(state, wake_word, model_name)
-    except KeyboardInterrupt:
-        print("\nStopping…")
+    if mode == "voice":
+        try:
+            run_whisper_loop(state, wake_word, model_name)
+        except KeyboardInterrupt:
+            print("\nStopping…")
+    else:
+        print("Chat mode not yet implemented.")
 
 
 if __name__ == "__main__":

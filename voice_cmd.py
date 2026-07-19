@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import commands
-from whisper_loop import iter_whisper_transcripts, resolve_whisper_model
 
 ROOT = Path(__file__).resolve().parent
 
@@ -69,6 +68,8 @@ def process_transcript_line(raw_line: str, state: ChatState, wake_word: str) -> 
 
 
 def run_whisper_loop(state: ChatState, wake_word: str, model_name: str) -> None:
+    from whisper_loop import iter_whisper_transcripts
+
     dev = DEVICE_INDEX if DEVICE_INDEX >= 0 else None
     for event in iter_whisper_transcripts(
         ROOT,
@@ -82,6 +83,18 @@ def run_whisper_loop(state: ChatState, wake_word: str, model_name: str) -> None:
         process_transcript_line(text, state, wake_word)
 
 
+def run_chat_loop(state: ChatState, wake_word: str) -> None:
+    while True:
+        try:
+            text = input("💬> ")
+        except (EOFError, KeyboardInterrupt):
+            print("\nStopping…")
+            break
+        if text.strip().lower() in ("quit", "exit"):
+            break
+        process_transcript_line(text, state, wake_word)
+
+
 def choose_mode() -> str:
     while True:
         choice = input("Choose mode (voice/chat): ").strip().lower()
@@ -92,17 +105,22 @@ def choose_mode() -> str:
 
 def main() -> None:
     mode = choose_mode()
-    model_name = resolve_whisper_model(ROOT)
     state = ChatState()
     wake_word = "nero"
 
     if mode == "voice":
+        from whisper_loop import resolve_whisper_model
+
+        model_name = resolve_whisper_model(ROOT)
         try:
             run_whisper_loop(state, wake_word, model_name)
         except KeyboardInterrupt:
             print("\nStopping…")
     else:
-        print("Chat mode not yet implemented.")
+        try:
+            run_chat_loop(state, wake_word)
+        except KeyboardInterrupt:
+            print("\nStopping…")
 
 
 if __name__ == "__main__":

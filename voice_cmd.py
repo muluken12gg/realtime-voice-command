@@ -18,13 +18,13 @@ class ChatState:
     awake: bool = False
     post_wake_cmd_until: float = 0.0
 
-def process_transcript_line(raw_line: str, state: ChatState, wake_word: str) -> None:
+def process_transcript_line(raw_line: str, state: ChatState, wake_word: str, use_wake_word: bool = True) -> None:
     if commands.speaking:
         return
     text = raw_line.strip()
     if not text:
         return
-    
+
     print(text)
     normalized = commands.normalize(text)
 
@@ -34,28 +34,26 @@ def process_transcript_line(raw_line: str, state: ChatState, wake_word: str) -> 
     if normalized in commands.ignored_phrases:
         return
 
-    if normalized.startswith(wake_word) and not state.awake:
+    if use_wake_word and normalized.startswith(wake_word) and not state.awake:
         cmd = normalized[len(wake_word):].strip()
 
-        # Example:
-        # "computer open vscode"
-        # immediately executes the command
         if cmd:
             commands.handle_command(cmd)
             return
 
-        # Example:
-        # user only says "computer"
         state.awake = True
         state.post_wake_cmd_until = time.monotonic() + POST_WAKE_CMD_SEC
         commands.speak("Yes?")
         return
 
-    if state.awake:
+    if use_wake_word and state.awake:
         if time.monotonic() < state.post_wake_cmd_until:
             return
         commands.handle_command(normalized)
         state.awake = False
+
+    if not use_wake_word:
+        commands.handle_command(normalized)
 
     if "hello" in normalized:
         commands.speak("What's up Muluken?")
@@ -83,7 +81,7 @@ def run_whisper_loop(state: ChatState, wake_word: str, model_name: str) -> None:
         process_transcript_line(text, state, wake_word)
 
 
-def run_chat_loop(state: ChatState, wake_word: str) -> None:
+def run_chat_loop(state: ChatState) -> None:
     while True:
         try:
             text = input("💬> ")
@@ -92,7 +90,7 @@ def run_chat_loop(state: ChatState, wake_word: str) -> None:
             break
         if text.strip().lower() in ("quit", "exit"):
             break
-        process_transcript_line(text, state, wake_word)
+        process_transcript_line(text, state, wake_word="", use_wake_word=False)
 
 
 def choose_mode() -> str:
@@ -118,7 +116,7 @@ def main() -> None:
             print("\nStopping…")
     else:
         try:
-            run_chat_loop(state, wake_word)
+            run_chat_loop(state)
         except KeyboardInterrupt:
             print("\nStopping…")
 

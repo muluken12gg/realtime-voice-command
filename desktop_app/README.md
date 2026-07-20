@@ -12,6 +12,10 @@ The Windows startup setting is implemented using the current user's
 `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` registry key, so it does
 not require administrator access.
 
+Closing the app now hides it in the system tray. Click the tray icon or choose
+**Open Voice Command** from its context menu to restore the window; use
+**Quit** from that menu to exit the app.
+
 ## Running it
 
 Once the local Flutter CLI is responsive, generate the Windows runner from

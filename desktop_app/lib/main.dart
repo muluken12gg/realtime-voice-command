@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'control_panel_controller.dart';
 import 'desktop_platform.dart';
+import 'desktop_window.dart';
 
-void main() {
-  runApp(const VoiceCommandApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final platform = WindowsDesktopPlatform();
+  await DesktopWindow(platform).initialize();
+  runApp(VoiceCommandApp(platform: platform));
 }
 
 class VoiceCommandApp extends StatelessWidget {

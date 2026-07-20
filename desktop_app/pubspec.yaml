@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  hotkey_manager: ^0.2.3
+  tray_manager: ^0.5.3
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +20,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/app_icon.ico

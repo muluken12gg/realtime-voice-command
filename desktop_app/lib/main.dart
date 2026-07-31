@@ -93,6 +93,10 @@ class _ControlPanelState extends State<ControlPanel> {
                     onChanged: _controller.setListening,
                   ),
                   const SizedBox(height: 24),
+                  _TextCommandCard(
+                    onSend: _controller.sendTextCommand,
+                  ),
+                  const SizedBox(height: 24),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -158,6 +162,84 @@ class _ListeningCard extends StatelessWidget {
               ),
             ),
             Switch(value: listening, onChanged: onChanged),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TextCommandCard extends StatefulWidget {
+  const _TextCommandCard({required this.onSend});
+
+  final ValueChanged<String> onSend;
+
+  @override
+  State<_TextCommandCard> createState() => _TextCommandCardState();
+}
+
+class _TextCommandCardState extends State<_TextCommandCard> {
+  final _textController = TextEditingController();
+
+  void _submit() {
+    final text = _textController.text.trim();
+    if (text.isNotEmpty) {
+      widget.onSend(text);
+      _textController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Executing command: "$text"'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Text Mode (Command Box)',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Type a command to run directly without using your voice (e.g. "open notepad", "what time is it").',
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    decoration: const InputDecoration(
+                      hintText: 'Type your command here...',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onSubmitted: (_) => _submit(),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  onPressed: _submit,
+                  icon: const Icon(Icons.send),
+                  label: const Text('Run'),
+                ),
+              ],
+            ),
           ],
         ),
       ),

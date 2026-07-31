@@ -33,6 +33,9 @@ class ControlPanelController extends ChangeNotifier {
     (settings) => settings.copyWith(stayInTray: enabled),
   );
 
+  Future<void> sendTextCommand(String command) =>
+      _platform.sendTextCommand(command);
+
   Future<void> _update(
     bool enabled,
     Future<void> Function(bool) save,

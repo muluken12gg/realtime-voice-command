@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -102,7 +103,11 @@ def choose_mode() -> str:
 
 
 def main() -> None:
-    mode = choose_mode()
+    if len(sys.argv) > 1 and sys.argv[1] in ("voice", "chat"):
+        mode = sys.argv[1]
+    else:
+        mode = choose_mode()
+        
     state = ChatState()
     wake_word = "nero"
 

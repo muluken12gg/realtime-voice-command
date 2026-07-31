@@ -67,12 +67,51 @@ class InMemoryDesktopPlatform implements DesktopPlatform {
   }
 }
 
+class PythonBackendPlatform implements DesktopPlatform {
+  PythonBackendPlatform(this._delegate);
+
+  final DesktopPlatform _delegate;
+  Process? _process;
+
+  @override
+  Future<DesktopSettings> loadSettings() => _delegate.loadSettings();
+
+  @override
+  Future<void> setListening(bool enabled) async {
+    await _delegate.setListening(enabled);
+    if (enabled) {
+      if (_process == null) {
+        // Run python from the parent directory
+        final pythonExe = r'..\venv\Scripts\python.exe';
+        final script = r'..\voice_cmd.py';
+        try {
+          _process = await Process.start(pythonExe, [script, 'voice']);
+        } catch (e) {
+          // fallback to global python if venv not found
+          _process = await Process.start('python', [script, 'voice']);
+        }
+      }
+    } else {
+      _process?.kill();
+      _process = null;
+    }
+  }
+
+  @override
+  Future<void> setStartWithWindows(bool enabled) =>
+      _delegate.setStartWithWindows(enabled);
+
+  @override
+  Future<void> setStayInTray(bool enabled) => _delegate.setStayInTray(enabled);
+}
+
+
 class WindowsDesktopPlatform implements DesktopPlatform {
   WindowsDesktopPlatform({WindowsStartup? startup, DesktopPlatform? delegate})
     : _startup =
           startup ??
           WindowsStartup(executablePath: Platform.resolvedExecutable),
-      _delegate = delegate ?? InMemoryDesktopPlatform();
+      _delegate = delegate ?? PythonBackendPlatform(InMemoryDesktopPlatform());
 
   final WindowsStartup _startup;
   final DesktopPlatform _delegate;

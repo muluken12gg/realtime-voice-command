@@ -284,6 +284,8 @@ def handle_command(text):
         pass
     elif search_google(text):
         pass
+    elif "what time is it" in text or "current time" in text or "tell me the time" in text:
+        report_time()
     elif "open browser" in text:
         webbrowser.open("https://google.com")
         speak("opening browser")

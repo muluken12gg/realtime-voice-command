@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'control_panel_controller.dart';
@@ -250,7 +252,9 @@ class _CommandsCard extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             FilledButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Process.run('cmd', ['/c', 'start', '..\\commands.json']);
+              },
               icon: const Icon(Icons.tune),
               label: const Text('Manage commands'),
             ),
